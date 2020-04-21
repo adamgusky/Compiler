@@ -19,5 +19,5 @@ int main(int argc, char * argv[]) {
 	} else {
 		aFile = stdout;
 	}
-	// yyparse();
+	yyparse();
 }

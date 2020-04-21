@@ -58,7 +58,6 @@ AppendSeq(struct InstrSeq *Seq1, struct InstrSeq *Seq2)
 void
 WriteSeq(struct InstrSeq *ASeq)
 { struct InstrSeq *instr;
-
   printf("WriteSeq\n");
   instr = ASeq;
   while (instr) {

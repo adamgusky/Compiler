@@ -24,11 +24,15 @@ struct BExprRes {
 };
 
 
+
+
 /* Semantics Actions */
 extern struct ExprRes *  doIntLit(char * digits);
 extern struct ExprRes *  doRval(char * name);
 extern struct InstrSeq *  doAssign(char * name,  struct ExprRes * Res1);
 extern struct ExprRes *  doAdd(struct ExprRes * Res1,  struct ExprRes * Res2);
+extern struct ExprRes *  doSub(struct ExprRes * Res1, struct ExprRes * Res2);
+extern struct ExprRes *  doNegate(struct ExprRes * Res1);
 extern struct ExprRes *  doMult(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct InstrSeq *  doPrint(struct ExprRes * Expr);
 extern struct BExprRes * doBExpr (struct ExprRes * Res1,  struct ExprRes * Res2);

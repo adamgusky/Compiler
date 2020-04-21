@@ -55,9 +55,11 @@ Stmt			:	Id '=' Expr ';'								{$$ = doAssign($1, $3);} ;
 Stmt			:	IF '(' BExpr ')' '{' StmtSeq '}'					{$$ = doIf($3, $6);};
 BExpr		:	Expr EQ Expr								{$$ = doBExpr($1, $3);};
 Expr			:	Expr '+' Term								{$$ = doAdd($1, $3); } ;
+Expr			:	Expr '-' Term								{$$ = doSub($1, $3); } ;
 Expr			:	Term									{$$ = $1; } ;
 Term		:	Term '*' Factor								{ $$ = doMult($1, $3); } ;
 Term		:	Factor									{ $$ = $1; } ;
+Factor : '-' Factor               {$$ = doNegate($2);};
 Factor		:	IntLit									{ $$ = doIntLit(yytext); };
 Factor		:	Ident									{ $$ = doRval(yytext); };
 Id			: 	Ident									{ $$ = strdup(yytext);}
