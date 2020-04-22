@@ -47,7 +47,9 @@
      EQ = 263,
      NOTEQ = 264,
      LTE = 265,
-     GTE = 266
+     GTE = 266,
+     AMP = 267,
+     OR = 268
    };
 #endif
 /* Tokens.  */
@@ -60,6 +62,8 @@
 #define NOTEQ 264
 #define LTE 265
 #define GTE 266
+#define AMP 267
+#define OR 268
 
 
 
@@ -75,7 +79,7 @@ typedef union YYSTYPE
   struct BExprRes * BExprRes;
 }
 /* Line 1529 of yacc.c.  */
-#line 79 "y.tab.h"
+#line 83 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

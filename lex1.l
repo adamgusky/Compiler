@@ -24,7 +24,7 @@ print					{return Write;}
 \>\=          {return GTE;}
 \=\=				{return EQ;}
 \!\=				{return NOTEQ;}
-\&\&        {return '&&';}
+\&\&        {return AMP;}
 \|\|         {return '||';}
 \<          {return '<';}
 \>          {return '>';}

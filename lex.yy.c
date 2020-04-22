@@ -799,7 +799,7 @@ YY_RULE_SETUP
 case 10:
 YY_RULE_SETUP
 #line 27 "lex1.l"
-{return '&&';}
+{return AMP;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
