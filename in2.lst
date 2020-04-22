@@ -1,7 +1,9 @@
-1. int num1;
-2. int num2;
-3. int num3;
-4. num1 = -10;
-5. num2 = -100;
-6. num3 = num2 - num1;
-7. print num3;
+1. if (5 >= 0) {
+2.   print 0;
+3. }
+4. if (5 >= 10) {
+5.   print 10;
+6. }
+7. if (5 >= 5 ) {
+8.   print 5;
+9. }

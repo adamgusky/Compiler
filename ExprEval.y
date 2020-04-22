@@ -41,28 +41,38 @@ extern SymTab *table;
 %token Write
 %token IF
 %token EQ
+%token NOTEQ
+%token LTE
+%token GTE
 
 %%
 
-Prog			:	Declarations StmtSeq						{Finish($2); } ;
+Prog			    :	Declarations StmtSeq						{Finish($2); } ;
 Declarations	:	Dec Declarations							{ };
 Declarations	:											{ };
-Dec			:	Int Ident {enterName(table, yytext); }';'	{};
-StmtSeq 		:	Stmt StmtSeq								{$$ = AppendSeq($1, $2); } ;
-StmtSeq		:											{$$ = NULL;} ;
-Stmt			:	Write Expr ';'								{$$ = doPrint($2); };
-Stmt			:	Id '=' Expr ';'								{$$ = doAssign($1, $3);} ;
-Stmt			:	IF '(' BExpr ')' '{' StmtSeq '}'					{$$ = doIf($3, $6);};
-BExpr		:	Expr EQ Expr								{$$ = doBExpr($1, $3);};
-Expr			:	Expr '+' Term								{$$ = doAdd($1, $3); } ;
-Expr			:	Expr '-' Term								{$$ = doSub($1, $3); } ;
-Expr			:	Term									{$$ = $1; } ;
-Term		:	Term '*' Factor								{ $$ = doMult($1, $3); } ;
-Term		:	Factor									{ $$ = $1; } ;
-Factor : '-' Factor               {$$ = doNegate($2);};
-Factor		:	IntLit									{ $$ = doIntLit(yytext); };
-Factor		:	Ident									{ $$ = doRval(yytext); };
-Id			: 	Ident									{ $$ = strdup(yytext);}
+Dec			      :	Int Ident {enterName(table, yytext); }';'	{};
+StmtSeq       :	Stmt StmtSeq								{$$ = AppendSeq($1, $2); } ;
+StmtSeq		    :											{$$ = NULL;} ;
+Stmt			    :	Write Expr ';'								{$$ = doPrint($2); };
+Stmt			    :	Id '=' Expr ';'								{$$ = doAssign($1, $3);} ;
+Stmt			    :	IF '(' BExpr ')' '{' StmtSeq '}'					{$$ = doIf($3, $6);};
+BExpr		      :	Expr EQ Expr								{$$ = doBExpr($1, $3);};
+BExpr		      :	Expr NOTEQ Expr								{$$ = doFalseBExpr($1, $3);};
+BExpr		      :	Expr '<' Expr								{$$ = doLT($1, $3);};
+BExpr		      :	Expr LTE Expr								{$$ = doLTE($1, $3);};
+BExpr		      :	Expr '>' Expr								{$$ = doGT($1, $3);};
+BExpr		      :	Expr GTE Expr								{$$ = doGTE($1, $3);};
+Expr			    :	Expr '+' Term								{$$ = doAdd($1, $3); } ;
+Expr			    :	Expr '-' Term								{$$ = doSub($1, $3); } ;
+Expr			    :	Term									{$$ = $1; } ;
+Term		      :	Term '*' Factor								{ $$ = doMult($1, $3); } ;
+Term		      :	Term '/' Factor								{ $$ = doDiv($1, $3); } ;
+Term		      :	Term '%' Factor								{ $$ = doMod($1, $3); } ;
+Term	 	      :	Factor									{ $$ = $1; } ;
+Factor        : '-' Factor               {$$ = doNegate($2);};
+Factor	    	:	IntLit								{ $$ = doIntLit(yytext); };
+Factor		    :	Ident									{ $$ = doRval(yytext); };
+Id			      : 	Ident									{ $$ = strdup(yytext);}
 
 %%
 

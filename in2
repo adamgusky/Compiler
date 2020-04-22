@@ -1,7 +1,9 @@
-int num1;
-int num2;
-int num3;
-num1 = -10;
-num2 = -100;
-num3 = num2 - num1;
-print num3;
+if (5 >= 0) {
+  print 0;
+}
+if (5 >= 10) {
+  print 10;
+}
+if (5 >= 5 ) {
+  print 5;
+}

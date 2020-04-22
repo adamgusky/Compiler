@@ -44,7 +44,10 @@
      Int = 260,
      Write = 261,
      IF = 262,
-     EQ = 263
+     EQ = 263,
+     NOTEQ = 264,
+     LTE = 265,
+     GTE = 266
    };
 #endif
 /* Tokens.  */
@@ -54,6 +57,9 @@
 #define Write 261
 #define IF 262
 #define EQ 263
+#define NOTEQ 264
+#define LTE 265
+#define GTE 266
 
 
 
@@ -69,7 +75,7 @@ typedef union YYSTYPE
   struct BExprRes * BExprRes;
 }
 /* Line 1529 of yacc.c.  */
-#line 73 "y.tab.h"
+#line 79 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
