@@ -20,12 +20,13 @@ int					{return Int;}
 print					{return Write;}
 {letter}({letter}|{digit})*	{return Ident;}
 {digit}{digit}*		{return IntLit;}
+\^													{return EXPNT;}
 \<\=          {return LTE;}
 \>\=          {return GTE;}
 \=\=				{return EQ;}
 \!\=				{return NOTEQ;}
 \&\&        {return AMP;}
-\|\|         {return '||';}
+\|\|         {return OR;}
 \<          {return '<';}
 \>          {return '>';}
 \!          {return '!';}

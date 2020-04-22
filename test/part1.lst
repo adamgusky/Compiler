@@ -1,0 +1,49 @@
+1. int num1;
+2. int num2;
+3. num1 = 10;
+4. num2 = 4;
+5. num1 = num1 + num2;
+6. num1 = num1 - num2;
+7. num1 = num1 * num2;
+8. num1 = num1 / num2;
+9. print num1;
+10. print num2;
+11. 
+12. num1 = num1 + -1;
+13. print num1;
+14. 
+15. num1 = num1 ^ 2;
+16. print num1;
+17. 
+18. if (num1 < 100) {
+19.   print 1;
+20. }
+21. if (num1 > 100) {
+22.   print 2;
+23. }
+24. 
+25. if (num1 == 100) {
+26.   print 3;
+27. }
+28. 
+29. if (num1 <= 50) {
+30.   print 4;
+31. }
+32. if (num1 >= 100) {
+33.   print 5;
+34. }
+35. if (num1 != 0) {
+36.   print 6;
+37. }
+38. 
+39. if (! num1 == 81) {
+40.   print 7;
+41. }
+42. 
+43. if (num1 == 81 && 2 == 2 ) {
+44.   print 8;
+45. }
+46. 
+47. if (num1 == 80 || num1 == 81) {
+48.   print 9;
+49. }

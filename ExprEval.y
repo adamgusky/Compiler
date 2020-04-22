@@ -48,6 +48,7 @@ extern SymTab *table;
 %token GTE
 %token AMP
 %token OR
+%token EXPNT
 
 
 %%
@@ -62,10 +63,12 @@ StmtSeq		    :											                      {$$ = NULL;} ;
 Stmt			    :	Write Expr ';'								            {$$ = doPrint($2); };
 Stmt			    :	Id '=' Expr ';'								            {$$ = doAssign($1, $3);} ;
 Stmt			    :	IF '(' BStmt ')' '{' StmtSeq '}'	        {$$ = doIf($3, $6);};
-BStmt         : BStmt OR BFactor                          {}
-BStmt         : BFactor                                   {$$ = $1;}
+BStmt         : '(' BStmt ')'                             {$$ = $2;};
+BStmt         : BFactor                                   {$$ = $1;};
 BFactor       : BExpr AMP BExpr                           {$$ = doAnd($1, $3);};
+BFactor       : BExpr OR BExpr                            {$$ = doOr($1, $3);};
 BFactor       : BExpr                                     {$$ = $1;};
+BExpr         : '!' BExpr                                 {$$ = doNot($2);};
 BExpr		      :	Expr EQ Expr								              {$$ = doBExpr($1, $3);};
 BExpr		      :	Expr NOTEQ Expr								            {$$ = doFalseBExpr($1, $3);};
 BExpr		      :	Expr '<' Expr								              {$$ = doLT($1, $3);};
@@ -78,11 +81,12 @@ Expr			    :	Term									                    {$$ = $1; } ;
 Term		      :	Term '*' Factor								            {$$ = doMult($1, $3); } ;
 Term		      :	Term '/' Factor								            {$$ = doDiv($1, $3); } ;
 Term		      :	Term '%' Factor								            {$$ = doMod($1, $3); } ;
+Term          : Term EXPNT Factor                         {$$ = doExp($1, $3);} ;
 Term	 	      :	Factor									                  {$$ = $1; } ;
 Factor        : '-' Factor                                {$$ = doNegate($2);};
 Factor	    	:	IntLit								                    {$$ = doIntLit(yytext); };
 Factor		    :	Ident									                    {$$ = doRval(yytext); };
-Id			      : Ident									                  {$$ = strdup(yytext);}
+Id			      : Ident									                    {$$ = strdup(yytext);}
 
 %%
 

@@ -127,22 +127,112 @@ struct ExprRes *  doDiv(struct ExprRes * Res1, struct ExprRes * Res2)  {
 }
 
 struct ExprRes *  doMod(struct ExprRes * Res1, struct ExprRes * Res2)  {
-  Res2 = doSub(Res2, doIntLit("1"));
+  int divideReg = AvailTmpReg();
 
-  int reg;
-
-  reg = AvailTmpReg();
-  AppendSeq(Res1->Instrs,Res2->Instrs);
-  AppendSeq(Res1->Instrs,GenInstr(NULL,"and",
-                                       TmpRegName(reg),
+  AppendSeq(Res1->Instrs, Res2->Instrs);
+  AppendSeq(Res1->Instrs,GenInstr(NULL,"div",
+                                       TmpRegName(divideReg),
                                        TmpRegName(Res1->Reg),
                                        TmpRegName(Res2->Reg)));
-  ReleaseTmpReg(Res1->Reg);
-  ReleaseTmpReg(Res2->Reg);
-  Res1->Reg = reg;
-  free(Res2);
+
+  int multReg = AvailTmpReg();
+
+  AppendSeq(Res1->Instrs,GenInstr(NULL,"mul",
+                                       TmpRegName(multReg),
+                                       TmpRegName(divideReg),
+                                       TmpRegName(Res2->Reg)));
+
+   AppendSeq(Res1->Instrs,GenInstr(NULL,"sub",
+                                        TmpRegName(Res1->Reg),
+                                        TmpRegName(Res1->Reg),
+                                        TmpRegName(multReg)));
+   ReleaseTmpReg(divideReg);
+   ReleaseTmpReg(multReg);
+   free(Res2);
+   return Res1;
+}
+
+extern struct ExprRes *  doExp(struct ExprRes * Res1, struct ExprRes * Res2) {
+  int baseReg = Res1->Reg;
+  int exponentReg = Res2->Reg;
+  int counter = AvailTmpReg();
+  int answer = AvailTmpReg();
+
+  char* loop = GenLabel();
+  char* exit = GenLabel();
+
+  AppendSeq(Res1->Instrs, Res2->Instrs);
+  AppendSeq(Res1->Instrs,GenInstr(NULL,"addi",
+                                       TmpRegName(answer),
+                                       "$zero",
+                                       "1"));
+
+   AppendSeq(Res1->Instrs,GenInstr(NULL,"addi",
+                                        TmpRegName(counter),
+                                        "$zero",
+                                        "0"));
+
+   AppendSeq(Res1->Instrs, GenInstr(loop, NULL, NULL, NULL, NULL));
+
+   AppendSeq(Res1->Instrs,GenInstr(NULL,"beq",
+                                       TmpRegName(counter),
+                                       TmpRegName(exponentReg),
+                                       exit));
+
+   AppendSeq(Res1->Instrs,GenInstr(NULL,"mul",
+                                      TmpRegName(answer),
+                                      TmpRegName(baseReg),
+                                      TmpRegName(answer)));
+
+  AppendSeq(Res1->Instrs,GenInstr(NULL,"addi",
+                                      TmpRegName(counter),
+                                      TmpRegName(counter),
+                                      "1"));
+
+  AppendSeq(Res1->Instrs,GenInstr(NULL,"j",
+                                      loop,
+                                      NULL,
+                                      NULL));
+
+
+  AppendSeq(Res1->Instrs, GenInstr(exit, NULL, NULL, NULL, NULL));
+  Res1->Reg = answer;
+
+  ReleaseTmpReg(counter);
+  ReleaseTmpReg(answer);
+  ReleaseTmpReg(baseReg);
+  ReleaseTmpReg(exponentReg);
+
   return Res1;
 }
+
+struct BExprRes * doNot(struct BExprRes * Res1) {
+  char* notLabel = GenLabel();
+
+  AppendSeq(Res1->Instrs, GenInstr(NULL, "j", notLabel, NULL, NULL));
+  AppendSeq(Res1->Instrs, GenInstr(Res1->Label, NULL, NULL, NULL, NULL));
+
+  Res1->Label = notLabel;
+
+  return Res1;
+}
+
+struct BExprRes * doOr(struct BExprRes* Res1, struct BExprRes* Res2) {
+  char* label = GenLabel();
+
+  AppendSeq(Res1->Instrs, GenInstr(NULL, "j", label, NULL, NULL));
+  AppendSeq(Res1->Instrs, GenInstr(Res1->Label, NULL, NULL, NULL, NULL));
+
+  AppendSeq(Res1->Instrs, Res2->Instrs);
+  AppendSeq(Res1->Instrs, GenInstr(label, NULL, NULL, NULL, NULL));
+
+  Res1->Label = Res2->Label;
+
+  free(Res2);
+
+  return Res1;
+}
+
 
 struct InstrSeq * doPrint(struct ExprRes * Expr) {
 

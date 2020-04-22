@@ -30,11 +30,15 @@ struct BExprRes {
 extern struct ExprRes *  doIntLit(char * digits);
 extern struct ExprRes *  doRval(char * name);
 extern struct InstrSeq *  doAssign(char * name,  struct ExprRes * Res1);
+extern struct ExprRes * doAdd(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct BExprRes * doAnd(struct BExprRes * Res1,  struct BExprRes * Res2);
+struct BExprRes * doOr(struct BExprRes* Res1, struct BExprRes* Res2);
 extern struct ExprRes *  doSub(struct ExprRes * Res1, struct ExprRes * Res2);
 extern struct ExprRes *  doNegate(struct ExprRes * Res1);
 extern struct ExprRes *  doMult(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct ExprRes *  doDiv(struct ExprRes * Res1,  struct ExprRes * Res2);
+extern struct ExprRes *  doExp(struct ExprRes * Res1, struct ExprRes * Res2);
+extern struct BExprRes * doNot(struct BExprRes * BRes);
 extern struct ExprRes *  doMod(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct BExprRes * doLT(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct BExprRes * doLTE(struct ExprRes * Res1,  struct ExprRes * Res2);

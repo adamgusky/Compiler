@@ -49,7 +49,8 @@
      LTE = 265,
      GTE = 266,
      AMP = 267,
-     OR = 268
+     OR = 268,
+     EXPNT = 269
    };
 #endif
 /* Tokens.  */
@@ -64,6 +65,7 @@
 #define GTE 266
 #define AMP 267
 #define OR 268
+#define EXPNT 269
 
 
 
@@ -79,7 +81,7 @@ typedef union YYSTYPE
   struct BExprRes * BExprRes;
 }
 /* Line 1529 of yacc.c.  */
-#line 83 "y.tab.h"
+#line 85 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
