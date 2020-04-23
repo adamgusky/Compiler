@@ -73,7 +73,6 @@ Stmt          : PrintLine ';'                             {$$ = doPrintLine();};
 Stmt			    :	Id '=' Expr ';'								            {$$ = doAssign($1, $3);} ;
 Stmt			    :	IF '(' BStmt ')' '{' StmtSeq '}'	        {$$ = doIf($3, $6);};
 Stmt          : PrintSpaces '(' Expr ')'  ';'             {$$ = doPrintSpaces($3);};
-BStmt         : '(' BStmt ')'                             {$$ = $2;};
 BStmt         : BFactor                                   {$$ = $1;};
 BFactor       : BExpr AMP BExpr                           {$$ = doAnd($1, $3);};
 BFactor       : BExpr OR BExpr                            {$$ = doOr($1, $3);};
@@ -99,6 +98,7 @@ Term	 	      :	Factor									                  {$$ = $1; } ;
 Factor        : XFactor EXPNT Factor                      {$$ = doExp($1, $3);};
 Factor	 	    :	XFactor			  			                      {$$ = $1; } ;
 XFactor       : '-' XFactor                               {$$ = doNegate($2);};
+XFactor       : '(' Expr ')'                              {$$ = $2;};
 XFactor     	:	IntLit								                    {$$ = doIntLit(yytext); };
 XFactor       :	Ident									                    {$$ = doRval(yytext); };
 Id			      : Ident									                    {$$ = strdup(yytext);}
