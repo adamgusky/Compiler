@@ -18,6 +18,7 @@ digit [0-9]
 if					{return IF;}
 int					{return Int;}
 print					{return Write;}
+read          {return Read;}
 printline     {return PrintLine;}
 printspaces    {return PrintSpaces;}
 {letter}({letter}|{digit})*	{return Ident;}
@@ -29,6 +30,7 @@ printspaces    {return PrintSpaces;}
 \!\=				{return NOTEQ;}
 \&\&        {return AMP;}
 \|\|         {return OR;}
+\,          {return ',';};
 \<          {return '<';}
 \>          {return '>';}
 \!          {return '!';}

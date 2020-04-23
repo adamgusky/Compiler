@@ -1,6 +1,7 @@
 1. int num1;
-2. printspaces(100);
-3. num1 = 100;
-4. print num1;
-5. printspaces(1*num1);
-6. print num1;
+2. int num2;
+3. int num3;
+4. num1 = 1;
+5. num2 = 2;
+6. num3 = 3;
+7. read( num1, num2, num3);

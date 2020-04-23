@@ -40,36 +40,38 @@
       know about them.  */
    enum yytokentype {
      Ident = 258,
-     IntLit = 259,
-     Int = 260,
-     Write = 261,
-     IF = 262,
-     EQ = 263,
-     NOTEQ = 264,
-     LTE = 265,
-     GTE = 266,
-     AMP = 267,
-     OR = 268,
-     EXPNT = 269,
-     PrintLine = 270,
-     PrintSpaces = 271
+     Read = 259,
+     IntLit = 260,
+     Int = 261,
+     Write = 262,
+     IF = 263,
+     EQ = 264,
+     NOTEQ = 265,
+     LTE = 266,
+     GTE = 267,
+     AMP = 268,
+     OR = 269,
+     EXPNT = 270,
+     PrintLine = 271,
+     PrintSpaces = 272
    };
 #endif
 /* Tokens.  */
 #define Ident 258
-#define IntLit 259
-#define Int 260
-#define Write 261
-#define IF 262
-#define EQ 263
-#define NOTEQ 264
-#define LTE 265
-#define GTE 266
-#define AMP 267
-#define OR 268
-#define EXPNT 269
-#define PrintLine 270
-#define PrintSpaces 271
+#define Read 259
+#define IntLit 260
+#define Int 261
+#define Write 262
+#define IF 263
+#define EQ 264
+#define NOTEQ 265
+#define LTE 266
+#define GTE 267
+#define AMP 268
+#define OR 269
+#define EXPNT 270
+#define PrintLine 271
+#define PrintSpaces 272
 
 
 
@@ -85,7 +87,7 @@ typedef union YYSTYPE
   struct BExprRes * BExprRes;
 }
 /* Line 1529 of yacc.c.  */
-#line 89 "y.tab.h"
+#line 91 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

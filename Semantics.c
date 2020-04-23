@@ -15,6 +15,7 @@ extern SymTab *table;
 
 /* Semantics support routines */
 
+
 struct ExprRes *  doIntLit(char * digits)  {
 
    struct ExprRes *res;
@@ -241,7 +242,7 @@ struct InstrSeq * doPrint(struct ExprRes * Expr) {
   code = Expr->Instrs;
 
     AppendSeq(code,GenInstr(NULL,"li","$v0","1",NULL));
-    AppendSeq(code,GenInstr(NULL,"move","$a0",TmpRegName(Expr->Reg),NULL));
+    AppendSeq(code,GenInstr(NULL,"move","$a0",TmpRegName(Expr->Reg), NULL));
     AppendSeq(code,GenInstr(NULL,"syscall",NULL,NULL,NULL));
 
     AppendSeq(code,GenInstr(NULL,"li","$v0","4",NULL));
@@ -432,7 +433,6 @@ extern struct BExprRes * doGTE(struct ExprRes * Res1,  struct ExprRes * Res2) {
 }
 
 struct InstrSeq* doPrintLine() {
-  printf("in doPrintLine()\n");
   struct InstrSeq* code;
   code = GenInstr(NULL, "li", "$v0", "4", NULL);
   AppendSeq(code, GenInstr(NULL, "la", "$a0", "_nl", NULL));
@@ -446,6 +446,57 @@ extern struct InstrSeq * doIf(struct BExprRes * bRes, struct InstrSeq * seq) {
 	AppendSeq(seq2, GenInstr(bRes->Label, NULL, NULL, NULL, NULL));
 	free(bRes);
 	return seq2;
+}
+
+extern struct ExprRes * printNoNewLine(char * Expr) {
+    printf("no new line\n");
+
+    struct ExprRes* result;
+
+    result = doRval(Expr);
+
+    AppendSeq(result->Instrs,GenInstr(NULL,"li","$v0","1",NULL));
+    AppendSeq(result->Instrs,GenInstr(NULL,"move","$a0",TmpRegName(result->Reg),NULL));
+    AppendSeq(result->Instrs,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+
+    ReleaseTmpReg(result->Reg);
+
+    WriteSeq(result->Instrs);
+
+    return result;
+
+}
+
+extern struct ExprRes * printNoNewLineComma(struct ExprRes * Res, char * Expr) {
+    struct ExprRes* result;
+
+    result = doRval(Expr);
+    AppendSeq( Res->Instrs, result->Instrs);
+
+    AppendSeq(Res->Instrs,GenInstr(NULL,"li","$v0","11",NULL));
+    AppendSeq(Res->Instrs,GenInstr(NULL,"li","$a0","44",NULL));
+    AppendSeq(Res->Instrs,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+
+    AppendSeq(Res->Instrs,GenInstr(NULL,"li","$v0","1",NULL));
+    AppendSeq(Res->Instrs,GenInstr(NULL,"move","$a0",TmpRegName(result->Reg),NULL));
+    AppendSeq(Res->Instrs,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+
+
+
+    ReleaseTmpReg(result->Reg);
+    WriteSeq(result->Instrs);
+
+    return Res;
+
+}
+
+struct InstrSeq * addLine(struct ExprRes * Res1) {
+  AppendSeq(Res1->Instrs, GenInstr(NULL,"li","$v0","4",NULL));
+    AppendSeq(Res1->Instrs, GenInstr(NULL,"la","$a0","_nl",NULL));
+    AppendSeq(Res1->Instrs, GenInstr(NULL,"syscall",NULL,NULL,NULL));
+    WriteSeq(Res1->Instrs);
+
+    return Res1->Instrs;
 }
 
 /*

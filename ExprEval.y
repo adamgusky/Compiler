@@ -31,6 +31,7 @@ extern SymTab *table;
 %type <ExprRes> Factor
 %type <ExprRes> Term
 %type <ExprRes> Expr
+%type <ExprRes> Idents
 %type <InstrSeq> StmtSeq
 %type <InstrSeq> Stmt
 %type <BExprRes> BExpr
@@ -38,7 +39,7 @@ extern SymTab *table;
 %type <BExprRes> BFactor
 
 %token Ident
-%token Idents
+%token Read
 %token IntLit
 %token Int
 %token Write
@@ -64,7 +65,7 @@ Dec			      :	Int Ident {enterName(table, yytext); }';'	{};
 StmtSeq       :	Stmt StmtSeq								              {$$ = AppendSeq($1, $2); } ;
 StmtSeq		    :											                      {$$ = NULL;} ;
 Stmt			    :	Write Expr ';'								            {$$ = doPrint($2); };
-Stmt          : Read '(' Idents ')' ';'                   {$$ = doPrintIdents($3);};
+Stmt          : Read '(' Idents ')' ';'                   {$$ = addLine($3); };
 Stmt          : PrintLine ';'                             {$$ = doPrintLine();};
 Stmt			    :	Id '=' Expr ';'								            {$$ = doAssign($1, $3);} ;
 Stmt			    :	IF '(' BStmt ')' '{' StmtSeq '}'	        {$$ = doIf($3, $6);};
@@ -81,8 +82,8 @@ BExpr		      :	Expr '<' Expr								              {$$ = doLT($1, $3);};
 BExpr		      :	Expr LTE Expr								              {$$ = doLTE($1, $3);};
 BExpr		      :	Expr '>' Expr								              {$$ = doGT($1, $3);};
 BExpr		      :	Expr GTE Expr								              {$$ = doGTE($1, $3);};
-Idents        : Idents ',' Id                             {}
-Idents        : Ids                                       {}
+Idents        : Idents ',' Id                             {$$ = printNoNewLineComma($1, $3);};
+Idents        : Id                                        {$$ = printNoNewLine($1);};
 Expr			    :	Expr '+' Term								              {$$ = doAdd($1, $3); } ;
 Expr			    :	Expr '-' Term								              {$$ = doSub($1, $3); } ;
 Expr			    :	Term									                    {$$ = $1; } ;
