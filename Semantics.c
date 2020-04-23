@@ -254,6 +254,50 @@ struct InstrSeq * doPrint(struct ExprRes * Expr) {
   return code;
 }
 
+struct InstrSeq * doPrintSpaces(struct ExprRes * Expr) {
+  int baseReg = Expr->Reg;
+  int counter = AvailTmpReg();
+
+  struct ExprRes* space = doIntLit(" ");
+
+  char* loop = GenLabel();
+  char* exit = GenLabel();
+  AppendSeq(Expr->Instrs,GenInstr(NULL,"addi",
+  TmpRegName(counter),
+  "$zero",
+  "0"));
+
+  AppendSeq(Expr->Instrs, GenInstr(loop, NULL, NULL, NULL, NULL));
+
+  AppendSeq(Expr->Instrs,GenInstr(NULL,"beq",
+  TmpRegName(counter),
+  TmpRegName(baseReg),
+  exit));
+
+
+  AppendSeq(Expr->Instrs,GenInstr(NULL,"li","$v0","11",NULL));
+  AppendSeq(Expr->Instrs,GenInstr(NULL,"li","$a0", "32", NULL));
+  AppendSeq(Expr->Instrs,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+
+  AppendSeq(Expr->Instrs,GenInstr(NULL,"addi",
+  TmpRegName(counter),
+  TmpRegName(counter),
+  "1"));
+
+  AppendSeq(Expr->Instrs,GenInstr(NULL,"j",
+  loop,
+  NULL,
+  NULL));
+
+
+  AppendSeq(Expr->Instrs, GenInstr(exit, NULL, NULL, NULL, NULL));
+
+  ReleaseTmpReg(counter);
+  ReleaseTmpReg(baseReg);
+
+  return Expr->Instrs;
+}
+
 struct InstrSeq * doAssign(char *name, struct ExprRes * Expr) {
 
   struct InstrSeq *code;
@@ -385,6 +429,15 @@ extern struct BExprRes * doGTE(struct ExprRes * Res1,  struct ExprRes * Res2) {
   free(Res2);
 
   return doBExpr(boolRes, constant);
+}
+
+struct InstrSeq* doPrintLine() {
+  printf("in doPrintLine()\n");
+  struct InstrSeq* code;
+  code = GenInstr(NULL, "li", "$v0", "4", NULL);
+  AppendSeq(code, GenInstr(NULL, "la", "$a0", "_nl", NULL));
+  AppendSeq(code, GenInstr(NULL, "syscall", NULL, NULL, NULL));
+  return code;
 }
 
 extern struct InstrSeq * doIf(struct BExprRes * bRes, struct InstrSeq * seq) {

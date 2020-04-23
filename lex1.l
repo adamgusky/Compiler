@@ -18,6 +18,8 @@ digit [0-9]
 if					{return IF;}
 int					{return Int;}
 print					{return Write;}
+printline     {return PrintLine;}
+printspaces    {return PrintSpaces;}
 {letter}({letter}|{digit})*	{return Ident;}
 {digit}{digit}*		{return IntLit;}
 \^													{return EXPNT;}

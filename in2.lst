@@ -1,3 +1,6 @@
-1. if ( (1 == 2) || 1 == 2 ) {
-                   ^
-Illegal Character in YACC
+1. int num1;
+2. printspaces(100);
+3. num1 = 100;
+4. print num1;
+5. printspaces(1*num1);
+6. print num1;

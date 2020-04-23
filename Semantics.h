@@ -45,6 +45,8 @@ extern struct BExprRes * doLTE(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct BExprRes * doGT(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct BExprRes * doGTE(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct InstrSeq *  doPrint(struct ExprRes * Expr);
+extern struct InstrSeq* doPrintLine();
+extern struct InstrSeq *  doPrintSpaces(struct ExprRes * Expr);
 extern struct BExprRes * doBExpr (struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct BExprRes * doFalseBExpr(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct InstrSeq * doIf(struct BExprRes *bRes, struct InstrSeq * seq);

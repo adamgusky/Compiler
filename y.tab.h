@@ -50,7 +50,9 @@
      GTE = 266,
      AMP = 267,
      OR = 268,
-     EXPNT = 269
+     EXPNT = 269,
+     PrintLine = 270,
+     PrintSpaces = 271
    };
 #endif
 /* Tokens.  */
@@ -66,6 +68,8 @@
 #define AMP 267
 #define OR 268
 #define EXPNT 269
+#define PrintLine 270
+#define PrintSpaces 271
 
 
 
@@ -81,7 +85,7 @@ typedef union YYSTYPE
   struct BExprRes * BExprRes;
 }
 /* Line 1529 of yacc.c.  */
-#line 85 "y.tab.h"
+#line 89 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

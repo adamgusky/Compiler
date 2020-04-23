@@ -38,6 +38,7 @@ extern SymTab *table;
 %type <BExprRes> BFactor
 
 %token Ident
+%token Idents
 %token IntLit
 %token Int
 %token Write
@@ -49,6 +50,8 @@ extern SymTab *table;
 %token AMP
 %token OR
 %token EXPNT
+%token PrintLine
+%token PrintSpaces
 
 
 %%
@@ -61,8 +64,11 @@ Dec			      :	Int Ident {enterName(table, yytext); }';'	{};
 StmtSeq       :	Stmt StmtSeq								              {$$ = AppendSeq($1, $2); } ;
 StmtSeq		    :											                      {$$ = NULL;} ;
 Stmt			    :	Write Expr ';'								            {$$ = doPrint($2); };
+Stmt          : Read '(' Idents ')' ';'                   {$$ = doPrintIdents($3);};
+Stmt          : PrintLine ';'                             {$$ = doPrintLine();};
 Stmt			    :	Id '=' Expr ';'								            {$$ = doAssign($1, $3);} ;
 Stmt			    :	IF '(' BStmt ')' '{' StmtSeq '}'	        {$$ = doIf($3, $6);};
+Stmt          : PrintSpaces '(' Expr ')'  ';'             {$$ = doPrintSpaces($3);};
 BStmt         : '(' BStmt ')'                             {$$ = $2;};
 BStmt         : BFactor                                   {$$ = $1;};
 BFactor       : BExpr AMP BExpr                           {$$ = doAnd($1, $3);};
@@ -75,6 +81,8 @@ BExpr		      :	Expr '<' Expr								              {$$ = doLT($1, $3);};
 BExpr		      :	Expr LTE Expr								              {$$ = doLTE($1, $3);};
 BExpr		      :	Expr '>' Expr								              {$$ = doGT($1, $3);};
 BExpr		      :	Expr GTE Expr								              {$$ = doGTE($1, $3);};
+Idents        : Idents ',' Id                             {}
+Idents        : Ids                                       {}
 Expr			    :	Expr '+' Term								              {$$ = doAdd($1, $3); } ;
 Expr			    :	Expr '-' Term								              {$$ = doSub($1, $3); } ;
 Expr			    :	Term									                    {$$ = $1; } ;
