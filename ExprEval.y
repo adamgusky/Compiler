@@ -29,8 +29,10 @@ extern SymTab *table;
 
 %type <string> Id
 %type <ExprRes> Factor
+%type <ExprRes> XFactor
 %type <ExprRes> Term
 %type <ExprRes> Expr
+%type <ExprRes> Exprs
 %type <ExprRes> Idents
 %type <InstrSeq> StmtSeq
 %type <InstrSeq> Stmt
@@ -65,6 +67,7 @@ Dec			      :	Int Ident {enterName(table, yytext); }';'	{};
 StmtSeq       :	Stmt StmtSeq								              {$$ = AppendSeq($1, $2); } ;
 StmtSeq		    :											                      {$$ = NULL;} ;
 Stmt			    :	Write Expr ';'								            {$$ = doPrint($2); };
+Stmt          : Write '(' Exprs ')' ';'                   {$$ = addLine($3);};
 Stmt          : Read '(' Idents ')' ';'                   {$$ = addLine($3); };
 Stmt          : PrintLine ';'                             {$$ = doPrintLine();};
 Stmt			    :	Id '=' Expr ';'								            {$$ = doAssign($1, $3);} ;
@@ -84,17 +87,20 @@ BExpr		      :	Expr '>' Expr								              {$$ = doGT($1, $3);};
 BExpr		      :	Expr GTE Expr								              {$$ = doGTE($1, $3);};
 Idents        : Idents ',' Id                             {$$ = printNoNewLineComma($1, $3);};
 Idents        : Id                                        {$$ = printNoNewLine($1);};
+Exprs         : Exprs ',' Expr                            {$$ = printNoNewLineCommaInt($1, $3);};
+Exprs         : Expr                                      {$$ = printNoNewLineInt($1);};
 Expr			    :	Expr '+' Term								              {$$ = doAdd($1, $3); } ;
 Expr			    :	Expr '-' Term								              {$$ = doSub($1, $3); } ;
 Expr			    :	Term									                    {$$ = $1; } ;
 Term		      :	Term '*' Factor								            {$$ = doMult($1, $3); } ;
 Term		      :	Term '/' Factor								            {$$ = doDiv($1, $3); } ;
 Term		      :	Term '%' Factor								            {$$ = doMod($1, $3); } ;
-Term          : Term EXPNT Factor                         {$$ = doExp($1, $3);} ;
 Term	 	      :	Factor									                  {$$ = $1; } ;
-Factor        : '-' Factor                                {$$ = doNegate($2);};
-Factor	    	:	IntLit								                    {$$ = doIntLit(yytext); };
-Factor		    :	Ident									                    {$$ = doRval(yytext); };
+Factor        : XFactor EXPNT Factor                      {$$ = doExp($1, $3);};
+Factor	 	    :	XFactor			  			                      {$$ = $1; } ;
+XFactor       : '-' XFactor                               {$$ = doNegate($2);};
+XFactor     	:	IntLit								                    {$$ = doIntLit(yytext); };
+XFactor       :	Ident									                    {$$ = doRval(yytext); };
 Id			      : Ident									                    {$$ = strdup(yytext);}
 
 %%

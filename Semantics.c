@@ -158,6 +158,7 @@ extern struct ExprRes *  doExp(struct ExprRes * Res1, struct ExprRes * Res2) {
   int exponentReg = Res2->Reg;
   int counter = AvailTmpReg();
   int answer = AvailTmpReg();
+  printf("Reg1: %s\nReg2: %s\n", TmpRegName(Res1->Reg), TmpRegName(Res2->Reg));
 
   char* loop = GenLabel();
   char* exit = GenLabel();
@@ -464,6 +465,36 @@ extern struct ExprRes * printNoNewLine(char * Expr) {
     WriteSeq(result->Instrs);
 
     return result;
+
+}
+
+extern struct ExprRes * printNoNewLineInt(struct ExprRes * result) {
+
+
+  AppendSeq(result->Instrs,GenInstr(NULL,"li","$v0","1",NULL));
+  AppendSeq(result->Instrs,GenInstr(NULL,"move","$a0",TmpRegName(result->Reg),NULL));
+  AppendSeq(result->Instrs,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+
+  ReleaseTmpReg(result->Reg);
+  return result;
+}
+
+extern struct ExprRes * printNoNewLineCommaInt(struct ExprRes * Res, struct ExprRes * result ) {
+    AppendSeq( Res->Instrs, result->Instrs);
+
+    AppendSeq(Res->Instrs,GenInstr(NULL,"li","$v0","11",NULL));
+    AppendSeq(Res->Instrs,GenInstr(NULL,"li","$a0","44",NULL));
+    AppendSeq(Res->Instrs,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+
+    AppendSeq(Res->Instrs,GenInstr(NULL,"li","$v0","1",NULL));
+    AppendSeq(Res->Instrs,GenInstr(NULL,"move","$a0",TmpRegName(result->Reg),NULL));
+    AppendSeq(Res->Instrs,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+
+
+
+    ReleaseTmpReg(result->Reg);
+
+    return Res;
 
 }
 
