@@ -619,8 +619,9 @@ void
 Finish(struct InstrSeq *Code)
 { struct InstrSeq *code;
   //struct SymEntry *entry;
-    int hasMore;
+  int hasMore;
   struct Attr * attr;
+  char * sizeString = (char *)malloc(sizeof(char) * 11);
 
 
   code = GenInstr(NULL,".text",NULL,NULL,NULL);
@@ -632,24 +633,28 @@ Finish(struct InstrSeq *Code)
   AppendSeq(code, GenInstr(NULL,"syscall",NULL,NULL,NULL));
   AppendSeq(code,GenInstr(NULL,".data",NULL,NULL,NULL));
   AppendSeq(code,GenInstr(NULL,".align","4",NULL,NULL));
-  AppendSeq(code,GenInstr("_nl",".asciiz","\"\\n\"",NULL,NULL));
+  // AppendSeq(code,GenInstr("_nl",".asciiz","\"\\n\"",NULL,NULL));
 
  hasMore = startIterator(table);
 
  while (hasMore) {
     if (getCurrentAttr(table)) {
       // there is a current attr
-      char * sizeString;
-      sizeString = (char *)malloc(sizeof(char) * 20);
-      int size = 4 * ((int) getCurrentAttr(table));
+
+      int size = ((int) getCurrentAttr(table));
+
       sprintf(sizeString, "%d", size);
       AppendSeq(code, GenInstr((char *) getCurrentName(table), ".space", sizeString, NULL, NULL));
+
     } else {
       // else print 0 for it's attr
       AppendSeq(code,GenInstr((char *) getCurrentName(table),".word","0",NULL,NULL));
     }
     hasMore = nextEntry(table);
  }
+ // had to move this under the .space, i don't know why yet but it does work again
+ AppendSeq(code,GenInstr("_nl",".asciiz","\"\\n\"",NULL,NULL));
+
 
   WriteSeq(code);
 

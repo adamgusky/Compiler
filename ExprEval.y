@@ -109,7 +109,6 @@ XFactor       : '-' XFactor                               {$$ = doNegate($2);};
 XFactor       : '(' Expr ')'                              {$$ = $2;};
 XFactor     	:	IntLit								                    {$$ = doIntLit(yytext); };
 XFactor       :	Ident									                    {$$ = doRval(yytext); };
-XFactor       : Ident '[' Expr ']'                        {$$ = doArray($1, $3);};
 Id			      : Ident									                    {$$ = strdup(yytext);}
 
 %%
