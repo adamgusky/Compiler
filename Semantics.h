@@ -30,6 +30,7 @@ struct BExprRes {
 extern struct ExprRes *  doIntLit(char * digits);
 extern struct ExprRes *  doRval(char * name);
 extern struct InstrSeq *  doAssign(char * name,  struct ExprRes * Res1);
+extern struct InstrSeq * assignArrIndex(char * name, struct ExprRes * index, struct ExprRes * expr);
 extern struct ExprRes * doAdd(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct BExprRes * doAnd(struct BExprRes * Res1,  struct BExprRes * Res2);
 struct BExprRes * doOr(struct BExprRes* Res1, struct BExprRes* Res2);
@@ -55,5 +56,10 @@ extern struct InstrSeq *  doPrintSpaces(struct ExprRes * Expr);
 extern struct BExprRes * doBExpr (struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct BExprRes * doFalseBExpr(struct ExprRes * Res1,  struct ExprRes * Res2);
 extern struct InstrSeq * doIf(struct BExprRes *bRes, struct InstrSeq * seq);
+extern struct InstrSeq * doWhile(struct BExprRes *bRes, struct InstrSeq * seq);
+extern struct InstrSeq * doFor(char * charVar1, struct ExprRes * res1, struct BExprRes * bRes1, char * var2, struct ExprRes * bRes2, struct InstrSeq * seq);
+extern struct InstrSeq * doIfElse(struct BExprRes * bRes, struct InstrSeq * seq1, struct InstrSeq * seq2);
+extern struct ExprRes * doArray (char * arrName, struct ExprRes* size);
+
 
 extern void	Finish(struct InstrSeq *Code);

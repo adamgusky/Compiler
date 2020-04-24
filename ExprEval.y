@@ -46,6 +46,7 @@ extern SymTab *table;
 %token Int
 %token Write
 %token IF
+%token ELSE
 %token EQ
 %token NOTEQ
 %token LTE
@@ -55,6 +56,8 @@ extern SymTab *table;
 %token EXPNT
 %token PrintLine
 %token PrintSpaces
+%token WHILE
+%token FOR
 
 
 %%
@@ -63,7 +66,8 @@ extern SymTab *table;
 Prog			    :	Declarations StmtSeq						          {Finish($2); } ;
 Declarations	:	Dec Declarations							            {};
 Declarations	:											                      {};
-Dec			      :	Int Ident {enterName(table, yytext); }';'	{};
+Dec			      :	Int Id {enterName(table, $2); }';'	      {};
+Dec           : Int Id {enterName(table, $2); } '[' IntLit {setCurrentAttr(table, (void*)atoi(yytext)); }  ']' ';' {};
 StmtSeq       :	Stmt StmtSeq								              {$$ = AppendSeq($1, $2); } ;
 StmtSeq		    :											                      {$$ = NULL;} ;
 Stmt			    :	Write Expr ';'								            {$$ = doPrint($2); };
@@ -71,8 +75,12 @@ Stmt          : Write '(' Exprs ')' ';'                   {$$ = addLine($3);};
 Stmt          : Read '(' Idents ')' ';'                   {$$ = addLine($3); };
 Stmt          : PrintLine ';'                             {$$ = doPrintLine();};
 Stmt			    :	Id '=' Expr ';'								            {$$ = doAssign($1, $3);} ;
+Stmt          : Id '[' Expr ']' '=' Expr ';'              {$$ = assignArrIndex($1, $3, $6);};
 Stmt			    :	IF '(' BStmt ')' '{' StmtSeq '}'	        {$$ = doIf($3, $6);};
+Stmt			    :	IF '(' BStmt ')' '{' StmtSeq '}' ELSE '{' StmtSeq '}'	                      {$$ = doIfElse($3, $6, $10);};
 Stmt          : PrintSpaces '(' Expr ')'  ';'             {$$ = doPrintSpaces($3);};
+Stmt          : WHILE '(' BStmt ')' '{' StmtSeq'}'        {$$ = doWhile($3, $6);};
+Stmt          : FOR '(' Id '=' Expr ';' BStmt ';' Id '=' Expr ')' '{' StmtSeq '}'           {$$ = doFor($3, $5, $7, $9, $11, $14);};
 BStmt         : BFactor                                   {$$ = $1;};
 BFactor       : BExpr AMP BExpr                           {$$ = doAnd($1, $3);};
 BFactor       : BExpr OR BExpr                            {$$ = doOr($1, $3);};
@@ -101,6 +109,7 @@ XFactor       : '-' XFactor                               {$$ = doNegate($2);};
 XFactor       : '(' Expr ')'                              {$$ = $2;};
 XFactor     	:	IntLit								                    {$$ = doIntLit(yytext); };
 XFactor       :	Ident									                    {$$ = doRval(yytext); };
+XFactor       : Ident '[' Expr ']'                        {$$ = doArray($1, $3);};
 Id			      : Ident									                    {$$ = strdup(yytext);}
 
 %%

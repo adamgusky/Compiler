@@ -45,15 +45,18 @@
      Int = 261,
      Write = 262,
      IF = 263,
-     EQ = 264,
-     NOTEQ = 265,
-     LTE = 266,
-     GTE = 267,
-     AMP = 268,
-     OR = 269,
-     EXPNT = 270,
-     PrintLine = 271,
-     PrintSpaces = 272
+     ELSE = 264,
+     EQ = 265,
+     NOTEQ = 266,
+     LTE = 267,
+     GTE = 268,
+     AMP = 269,
+     OR = 270,
+     EXPNT = 271,
+     PrintLine = 272,
+     PrintSpaces = 273,
+     WHILE = 274,
+     FOR = 275
    };
 #endif
 /* Tokens.  */
@@ -63,15 +66,18 @@
 #define Int 261
 #define Write 262
 #define IF 263
-#define EQ 264
-#define NOTEQ 265
-#define LTE 266
-#define GTE 267
-#define AMP 268
-#define OR 269
-#define EXPNT 270
-#define PrintLine 271
-#define PrintSpaces 272
+#define ELSE 264
+#define EQ 265
+#define NOTEQ 266
+#define LTE 267
+#define GTE 268
+#define AMP 269
+#define OR 270
+#define EXPNT 271
+#define PrintLine 272
+#define PrintSpaces 273
+#define WHILE 274
+#define FOR 275
 
 
 
@@ -87,7 +93,7 @@ typedef union YYSTYPE
   struct BExprRes * BExprRes;
 }
 /* Line 1529 of yacc.c.  */
-#line 91 "y.tab.h"
+#line 97 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

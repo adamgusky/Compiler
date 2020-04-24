@@ -42,6 +42,10 @@ struct ExprRes *  doRval(char * name)  {
   return res;
 }
 
+extern struct ExprRes * doArray (char * arrName, struct ExprRes* size) {
+
+}
+
 struct ExprRes *  doAdd(struct ExprRes * Res1, struct ExprRes * Res2)  {
 
    int reg;
@@ -301,21 +305,40 @@ struct InstrSeq * doPrintSpaces(struct ExprRes * Expr) {
 }
 
 struct InstrSeq * doAssign(char *name, struct ExprRes * Expr) {
-
   struct InstrSeq *code;
-
-
-   if (!findName(table, name)) {
-		writeIndicator(getCurrentColumnNum());
-		writeMessage("Undeclared variable");
-   }
+  if (!findName(table, name)) {
+    writeIndicator(getCurrentColumnNum());
+    writeMessage("Undeclared variable");
+  }
 
   code = Expr->Instrs;
 
-  AppendSeq(code,GenInstr(NULL,"sw",TmpRegName(Expr->Reg), name,NULL));
+  AppendSeq(code,GenInstr(NULL,"sw",TmpRegName(Expr->Reg), name, NULL));
 
   ReleaseTmpReg(Expr->Reg);
   free(Expr);
+  return code;
+}
+
+extern struct InstrSeq * assignArrIndex(char * name, struct ExprRes * byteIndex, struct ExprRes * expr) {
+  struct InstrSeq *code;
+  int address = AvailTmpReg();
+  int specAddress = AvailTmpReg();
+  char* specAddressStr = (char*)malloc(sizeof(char)*20);
+
+  if (!findName(table, name)) {
+    writeIndicator(getCurrentColumnNum());
+    writeMessage("Undeclared variable");
+  }
+
+  code = AppendSeq(byteIndex->Instrs, expr->Instrs);
+  AppendSeq(code, GenInstr(NULL, "la", TmpRegName(address), name, NULL));
+  AppendSeq(code, GenInstr(NULL, "add", TmpRegName(byteIndex->Reg), TmpRegName(byteIndex->Reg), TmpRegName(byteIndex->Reg)));
+  AppendSeq(code, GenInstr(NULL, "add", TmpRegName(byteIndex->Reg), TmpRegName(byteIndex->Reg), TmpRegName(byteIndex->Reg)));
+  AppendSeq(code, GenInstr(NULL, "add", TmpRegName(specAddress), TmpRegName(byteIndex->Reg), TmpRegName(address)));
+
+  sprintf(specAddressStr, "0(%s)", TmpRegName(specAddress));
+  AppendSeq(code, GenInstr(NULL, "sw", TmpRegName(expr->Reg), specAddressStr, NULL));
 
   return code;
 }
@@ -441,14 +464,6 @@ struct InstrSeq* doPrintLine() {
   return code;
 }
 
-extern struct InstrSeq * doIf(struct BExprRes * bRes, struct InstrSeq * seq) {
-	struct InstrSeq * seq2;
-	seq2 = AppendSeq(bRes->Instrs, seq);
-	AppendSeq(seq2, GenInstr(bRes->Label, NULL, NULL, NULL, NULL));
-	free(bRes);
-	return seq2;
-}
-
 extern struct ExprRes * printNoNewLine(char * Expr) {
     printf("no new line\n");
 
@@ -529,6 +544,58 @@ struct InstrSeq * addLine(struct ExprRes * Res1) {
 
     return Res1->Instrs;
 }
+extern struct InstrSeq * doIf(struct BExprRes * bRes, struct InstrSeq * seq) {
+	struct InstrSeq * seq2;
+	seq2 = AppendSeq(bRes->Instrs, seq);
+	AppendSeq(seq2, GenInstr(bRes->Label, NULL, NULL, NULL, NULL));
+	free(bRes);
+	return seq2;
+}
+
+extern struct InstrSeq * doIfElse(struct BExprRes * bRes, struct InstrSeq * seq1, struct InstrSeq * seq2) {
+	struct InstrSeq * seq;
+	seq = AppendSeq(bRes->Instrs, seq1);
+  char* endLabel = GenLabel();
+
+  AppendSeq(seq, GenInstr(NULL, "j", endLabel, NULL, NULL));
+  AppendSeq(seq, GenInstr(bRes->Label, NULL, NULL, NULL, NULL));
+  AppendSeq(seq, seq2);
+  AppendSeq(seq, GenInstr(endLabel, NULL, NULL, NULL, NULL));
+
+	free(bRes);
+	return seq;
+}
+
+extern struct InstrSeq * doWhile(struct BExprRes * bRes, struct InstrSeq * seq) {
+	struct InstrSeq * rtrn;
+  char* start = GenLabel();
+
+
+  rtrn = AppendSeq(GenInstr(start, NULL, NULL, NULL, NULL), bRes->Instrs);
+  AppendSeq(rtrn, seq);
+	AppendSeq(rtrn, GenInstr(NULL, "j", start, NULL, NULL));
+  AppendSeq(rtrn, GenInstr(bRes->Label, NULL, NULL, NULL, NULL));
+
+	free(bRes);
+	return rtrn;
+}
+
+extern struct InstrSeq * doFor(char * charVar1, struct ExprRes * res1, struct BExprRes * bRes1, char * var2, struct ExprRes * res2, struct InstrSeq * seq) {
+	struct InstrSeq * rtrn;
+  char* start = GenLabel();
+
+  struct ExprRes * var1 = doRval(charVar1);
+  rtrn = AppendSeq(doAssign(charVar1, res1), GenInstr(start, NULL, NULL, NULL, NULL));
+  AppendSeq(rtrn, bRes1->Instrs); // add start label before instructions
+
+  AppendSeq(rtrn, seq); //
+  AppendSeq(rtrn, doAssign(var2, res2));
+	AppendSeq(rtrn, GenInstr(NULL, "j", start, NULL, NULL)); // jump back to if statement to see if you loop again
+  AppendSeq(rtrn, GenInstr(bRes1->Label, NULL, NULL, NULL, NULL)); // append the end label
+
+	free(bRes1);
+	return rtrn;
+}
 
 /*
 
@@ -568,8 +635,19 @@ Finish(struct InstrSeq *Code)
   AppendSeq(code,GenInstr("_nl",".asciiz","\"\\n\"",NULL,NULL));
 
  hasMore = startIterator(table);
+
  while (hasMore) {
-	AppendSeq(code,GenInstr((char *) getCurrentName(table),".word","0",NULL,NULL));
+    if (getCurrentAttr(table)) {
+      // there is a current attr
+      char * sizeString;
+      sizeString = (char *)malloc(sizeof(char) * 20);
+      int size = 4 * ((int) getCurrentAttr(table));
+      sprintf(sizeString, "%d", size);
+      AppendSeq(code, GenInstr((char *) getCurrentName(table), ".space", sizeString, NULL, NULL));
+    } else {
+      // else print 0 for it's attr
+      AppendSeq(code,GenInstr((char *) getCurrentName(table),".word","0",NULL,NULL));
+    }
     hasMore = nextEntry(table);
  }
 

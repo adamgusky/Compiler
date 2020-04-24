@@ -16,6 +16,9 @@ digit [0-9]
 
 %%
 if					{return IF;}
+else        {return ELSE;}
+while       {return WHILE;}
+for         {return FOR;}
 int					{return Int;}
 print					{return Write;}
 read          {return Read;}
@@ -45,6 +48,8 @@ printspaces    {return PrintSpaces;}
 \}					{return '}';}
 \(					{return '(';}
 \)					{return ')';}
+\[          {return '[';}
+\]          {return ']';}
 
 [ ]				{}
 \t				{}
