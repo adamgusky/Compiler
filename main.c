@@ -5,6 +5,7 @@
 extern int yyparse();
 
 SymTab *table;
+SymTab *fList; // this is where I am going to store functions. This is so the last syscall of the program is still in main
 //SymTab *ProcSymTab;
 //struct SymEntry *entry;
 //int inProc =0;
@@ -12,6 +13,7 @@ FILE *aFile;
 
 int main(int argc, char * argv[]) {
 	table = createSymTab(100);
+	fList = createSymTab(50);
 	//assumes there is a listing file
 	openFiles(argv[1], argv[2]);
 	if (argc == 4) {

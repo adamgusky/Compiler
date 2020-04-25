@@ -1,5 +1,9 @@
 int num;
-num = 2;
 void printPoopy() {
   num = 2;
+  print num;
 }
+
+printPoopy();
+printPoopy();
+printPoopy();

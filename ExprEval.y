@@ -69,6 +69,7 @@ Declarations	:	Dec Declarations							            {};
 Declarations	:											                      {};
 Dec			      :	Int Id {enterName(table, $2); }';'	      {};
 Dec           : Int Id {enterName(table, $2); } '[' IntLit {setCurrentAttr(table, (void*)atoi(yytext)); }  ']' ';' {};
+Dec           : VOID Id '(' ')' '{' StmtSeq '}'           { doVoidNoParams($2, $6);};
 StmtSeq       :	Stmt StmtSeq								              {$$ = AppendSeq($1, $2); } ;
 StmtSeq		    :											                      {$$ = NULL;} ;
 Stmt			    :	Write Expr ';'								            {$$ = doPrint($2); };
@@ -82,7 +83,7 @@ Stmt			    :	IF '(' BStmt ')' '{' StmtSeq '}' ELSE '{' StmtSeq '}'	             
 Stmt          : PrintSpaces '(' Expr ')'  ';'             {$$ = doPrintSpaces($3);};
 Stmt          : WHILE '(' BStmt ')' '{' StmtSeq'}'        {$$ = doWhile($3, $6);};
 Stmt          : FOR '(' Id '=' Expr ';' BStmt ';' Id '=' Expr ')' '{' StmtSeq '}'           {$$ = doFor($3, $5, $7, $9, $11, $14);};
-Stmt          : VOID Id '(' ')' '{' StmtSeq '}'           {$$ = doVoidNoParams($2, $6);};
+Stmt          : Id '(' ')' ';'                            {$$ = callVoidNoParams($1);};
 BStmt         : BFactor                                   {$$ = $1;};
 BFactor       : BExpr AMP BExpr                           {$$ = doAnd($1, $3);};
 BFactor       : BExpr OR BExpr                            {$$ = doOr($1, $3);};

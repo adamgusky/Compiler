@@ -1,5 +1,9 @@
 1. int num;
-2. num = 2;
-3. void printPoopy() {
-4.   num = 2;
+2. void printPoopy() {
+3.   num = 2;
+4.   print num;
 5. }
+6. 
+7. printPoopy();
+8. printPoopy();
+9. printPoopy();

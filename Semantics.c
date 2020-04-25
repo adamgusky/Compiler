@@ -12,7 +12,7 @@
 #include "IOMngr.h"
 
 extern SymTab *table;
-
+extern SymTab *fList;
 /* Semantics support routines */
 
 
@@ -631,11 +631,22 @@ extern struct InstrSeq * doFor(char * charVar1, struct ExprRes * res1, struct BE
 	return rtrn;
 }
 
-extern struct InstrSeq * doVoidNoParams(char * name, struct InstrSeq * seq) {
+void doVoidNoParams(char * name, struct InstrSeq * seq) {
   struct InstrSeq * rtrn;
   rtrn = GenInstr(name, NULL, NULL, NULL, NULL);
   AppendSeq(rtrn, seq);
   AppendSeq(rtrn, GenInstr(NULL, "jr", "$ra", NULL, NULL));
+  if (enterName(fList, name)) {
+    setCurrentAttr(fList, (void*)rtrn);
+  } else {
+    writeIndicator(getCurrentColumnNum());
+    writeMessage("Failed on doVoidNoParams");
+  }
+}
+
+struct InstrSeq * callVoidNoParams(char * name) {
+  struct InstrSeq * rtrn;
+  rtrn = GenInstr(NULL, "jal", name, NULL, NULL);
   return rtrn;
 }
 
@@ -662,6 +673,7 @@ Finish(struct InstrSeq *Code)
 { struct InstrSeq *code;
   //struct SymEntry *entry;
   int hasMore;
+  int hasMoreFunctions;
   struct Attr * attr;
   char * sizeString = (char *)malloc(sizeof(char) * 10);
 
@@ -673,9 +685,20 @@ Finish(struct InstrSeq *Code)
   AppendSeq(code,Code);
   AppendSeq(code, GenInstr(NULL, "li", "$v0", "10", NULL));
   AppendSeq(code, GenInstr(NULL,"syscall",NULL,NULL,NULL));
+
+  hasMoreFunctions = startIterator(fList);
+  while (hasMoreFunctions) {
+    if (getCurrentAttr(fList)) {
+      AppendSeq(code, (struct InstrSeq *)(getCurrentAttr(fList)));
+    }
+    hasMoreFunctions = nextEntry(fList);
+  }
+
   AppendSeq(code,GenInstr(NULL,".data",NULL,NULL,NULL));
   AppendSeq(code,GenInstr(NULL,".align","4",NULL,NULL));
   // AppendSeq(code,GenInstr("_nl",".asciiz","\"\\n\"",NULL,NULL));
+
+
 
  hasMore = startIterator(table);
 
