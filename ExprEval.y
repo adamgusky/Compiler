@@ -58,6 +58,7 @@ extern SymTab *table;
 %token PrintSpaces
 %token WHILE
 %token FOR
+%token VOID
 
 
 %%
@@ -81,6 +82,7 @@ Stmt			    :	IF '(' BStmt ')' '{' StmtSeq '}' ELSE '{' StmtSeq '}'	             
 Stmt          : PrintSpaces '(' Expr ')'  ';'             {$$ = doPrintSpaces($3);};
 Stmt          : WHILE '(' BStmt ')' '{' StmtSeq'}'        {$$ = doWhile($3, $6);};
 Stmt          : FOR '(' Id '=' Expr ';' BStmt ';' Id '=' Expr ')' '{' StmtSeq '}'           {$$ = doFor($3, $5, $7, $9, $11, $14);};
+Stmt          : VOID Id '(' ')' '{' StmtSeq '}'           {$$ = doVoidNoParams($2, $6);};
 BStmt         : BFactor                                   {$$ = $1;};
 BFactor       : BExpr AMP BExpr                           {$$ = doAnd($1, $3);};
 BFactor       : BExpr OR BExpr                            {$$ = doOr($1, $3);};
@@ -108,7 +110,8 @@ Factor	 	    :	XFactor			  			                      {$$ = $1; } ;
 XFactor       : '-' XFactor                               {$$ = doNegate($2);};
 XFactor       : '(' Expr ')'                              {$$ = $2;};
 XFactor     	:	IntLit								                    {$$ = doIntLit(yytext); };
-XFactor       :	Ident									                    {$$ = doRval(yytext); };
+XFactor       :	Id									                      {$$ = doRval($1); };
+XFactor       : Id '[' Expr ']'                           {$$ = doArray($1, $3);};
 Id			      : Ident									                    {$$ = strdup(yytext);}
 
 %%

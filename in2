@@ -1,2 +1,5 @@
-int num[10];
-num[0] = 4;
+int num;
+num = 2;
+void printPoopy() {
+  num = 2;
+}

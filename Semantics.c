@@ -42,7 +42,33 @@ struct ExprRes *  doRval(char * name)  {
   return res;
 }
 
-extern struct ExprRes * doArray (char * arrName, struct ExprRes* size) {
+extern struct ExprRes * doArray (char * arrName, struct ExprRes* index) {
+  struct ExprRes *rtrn;
+  int address= AvailTmpReg();
+  char* formattedAddress = (char*)malloc(sizeof(char)*10);
+
+  if (!findName(table, arrName)) {
+    writeIndicator(getCurrentColumnNum());
+    writeMessage("Undeclared variable");
+  }
+
+  rtrn = (struct ExprRes*)malloc(sizeof(struct ExprRes));
+  rtrn->Reg = AvailTmpReg();
+  rtrn->Instrs = index->Instrs;
+
+  AppendSeq(rtrn->Instrs, GenInstr(NULL, "la", TmpRegName(address), arrName, NULL));
+  AppendSeq(rtrn->Instrs, GenInstr(NULL, "sll", TmpRegName(index->Reg), TmpRegName(index->Reg), "2"));
+  AppendSeq(rtrn->Instrs, GenInstr(NULL, "add", TmpRegName(address), TmpRegName(address), TmpRegName(index->Reg)));
+  sprintf(formattedAddress, "0(%s)", TmpRegName(address));
+  AppendSeq(rtrn->Instrs, GenInstr(NULL, "lw", TmpRegName(rtrn->Reg), formattedAddress, NULL));
+
+  ReleaseTmpReg(index->Reg);
+  ReleaseTmpReg(address);
+
+  free(index);
+  free(formattedAddress);
+
+  return rtrn;
 
 }
 
@@ -340,6 +366,14 @@ extern struct InstrSeq * assignArrIndex(char * name, struct ExprRes * byteIndex,
   sprintf(specAddressStr, "0(%s)", TmpRegName(specAddress));
   AppendSeq(code, GenInstr(NULL, "sw", TmpRegName(expr->Reg), specAddressStr, NULL));
 
+  ReleaseTmpReg(byteIndex->Reg);
+  ReleaseTmpReg(expr->Reg);
+  ReleaseTmpReg(address);
+  ReleaseTmpReg(specAddress);
+
+  free(byteIndex);
+  free(expr);
+
   return code;
 }
 
@@ -597,6 +631,14 @@ extern struct InstrSeq * doFor(char * charVar1, struct ExprRes * res1, struct BE
 	return rtrn;
 }
 
+extern struct InstrSeq * doVoidNoParams(char * name, struct InstrSeq * seq) {
+  struct InstrSeq * rtrn;
+  rtrn = GenInstr(name, NULL, NULL, NULL, NULL);
+  AppendSeq(rtrn, seq);
+  AppendSeq(rtrn, GenInstr(NULL, "jr", "$ra", NULL, NULL));
+  return rtrn;
+}
+
 /*
 
 extern struct InstrSeq * doIf(struct ExprRes *res1, struct ExprRes *res2, struct InstrSeq * seq) {
@@ -621,7 +663,7 @@ Finish(struct InstrSeq *Code)
   //struct SymEntry *entry;
   int hasMore;
   struct Attr * attr;
-  char * sizeString = (char *)malloc(sizeof(char) * 11);
+  char * sizeString = (char *)malloc(sizeof(char) * 10);
 
 
   code = GenInstr(NULL,".text",NULL,NULL,NULL);
@@ -641,7 +683,7 @@ Finish(struct InstrSeq *Code)
     if (getCurrentAttr(table)) {
       // there is a current attr
 
-      int size = ((int) getCurrentAttr(table));
+      int size = 4 * ((int) getCurrentAttr(table));
 
       sprintf(sizeString, "%d", size);
       AppendSeq(code, GenInstr((char *) getCurrentName(table), ".space", sizeString, NULL, NULL));

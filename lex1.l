@@ -19,6 +19,7 @@ if					{return IF;}
 else        {return ELSE;}
 while       {return WHILE;}
 for         {return FOR;}
+void        {return VOID;}
 int					{return Int;}
 print					{return Write;}
 read          {return Read;}
