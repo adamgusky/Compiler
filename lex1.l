@@ -21,6 +21,7 @@ while       {return WHILE;}
 for         {return FOR;}
 void        {return VOID;}
 int					{return Int;}
+return      {return RETURN;}
 print					{return Write;}
 read          {return Read;}
 printline     {return PrintLine;}

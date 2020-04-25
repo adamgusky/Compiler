@@ -1,9 +1,20 @@
-int num;
-void printPoopy() {
-  num = 2;
-  print num;
+
+void f1() {
+  print 1;
+  f2();
+}
+void f2() {
+  print 2;
 }
 
-printPoopy();
-printPoopy();
-printPoopy();
+f1();
+
+
+int ( IntIdList )
+
+IntIdList : IntIdList, Expr
+IntIdList : IntIdList, Id
+IntIdList : Expr
+IntIdList : Id                    doAddToStack( add to the Proc SymTab)
+
+function(Expr, Id, Expr)

@@ -631,11 +631,27 @@ extern struct InstrSeq * doFor(char * charVar1, struct ExprRes * res1, struct BE
 	return rtrn;
 }
 
-void doVoidNoParams(char * name, struct InstrSeq * seq) {
+extern void doNoParams(char * type, char * name, struct InstrSeq * seq) {
   struct InstrSeq * rtrn;
+  struct paramInfo * parameters;
+
+  parameters = malloc(sizeof(struct paramInfo));
+
+  parameters->type = type;
+  parameters->num = 0;
+
   rtrn = GenInstr(name, NULL, NULL, NULL, NULL);
+  AppendSeq(rtrn, SaveSeq());
+  AppendSeq(rtrn, GenInstr(NULL, "addi", "$sp", "$sp", "-8"));
+  AppendSeq(rtrn, GenInstr(NULL, "sw", "$ra", "($sp)", NULL));
   AppendSeq(rtrn, seq);
+  AppendSeq(rtrn, GenInstr(NULL, "lw", "$ra", "($sp)", NULL));
+  AppendSeq(rtrn, GenInstr(NULL, "addi", "$sp", "$sp", "8"));
+  AppendSeq(rtrn, RestoreSeq());
   AppendSeq(rtrn, GenInstr(NULL, "jr", "$ra", NULL, NULL));
+
+  parameters->instructions = rtrn;
+
   if (enterName(fList, name)) {
     setCurrentAttr(fList, (void*)rtrn);
   } else {
@@ -644,11 +660,42 @@ void doVoidNoParams(char * name, struct InstrSeq * seq) {
   }
 }
 
-struct InstrSeq * callVoidNoParams(char * name) {
+extern struct ExprRes * doFuncAssign(char * func) {
+  struct ExprRes * rtrn;
+  rtrn = (struct ExprRes*) malloc(sizeof(struct ExprRes));
+  rtrn->Reg = AvailTmpReg();
+
+  if ( !findName(fList, func)) {
+    writeIndicator(getCurrentColumnNum());
+    writeMessage("Setting value to unkown function (Semantics.c, doFuncAssign())");
+
+  }
+
+  rtrn->Instrs = callVoidNoParams(func);
+
+  AppendSeq(rtrn->Instrs, GenInstr(NULL, "lw", TmpRegName(rtrn->Reg), "-4($sp)", NULL));
+
+  // free
+  return rtrn;
+}
+
+
+extern struct InstrSeq * callVoidNoParams(char * name) {
   struct InstrSeq * rtrn;
+
   rtrn = GenInstr(NULL, "jal", name, NULL, NULL);
   return rtrn;
 }
+
+extern struct InstrSeq * funcReturn(struct ExprRes * expr) {
+  struct InstrSeq * rtrn;
+  rtrn = expr->Instrs;
+  AppendSeq(rtrn, GenInstr(NULL, "sw", TmpRegName(expr->Reg), "4($sp)", NULL));
+  return rtrn;
+}
+
+
+
 
 /*
 

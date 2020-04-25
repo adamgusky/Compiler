@@ -57,7 +57,8 @@
      PrintSpaces = 273,
      WHILE = 274,
      FOR = 275,
-     VOID = 276
+     VOID = 276,
+     RETURN = 277
    };
 #endif
 /* Tokens.  */
@@ -80,6 +81,7 @@
 #define WHILE 274
 #define FOR 275
 #define VOID 276
+#define RETURN 277
 
 
 
@@ -95,7 +97,7 @@ typedef union YYSTYPE
   struct BExprRes * BExprRes;
 }
 /* Line 1529 of yacc.c.  */
-#line 99 "y.tab.h"
+#line 101 "y.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

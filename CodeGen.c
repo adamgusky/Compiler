@@ -139,11 +139,13 @@ SaveSeq()
 
   scnt = 0;
   save = NULL;
+  code = NULL;
   for (i = 0; i < MAXREG; i++) {
     if (!Registers[i].Free) {
-      scnt++;
+      //scnt++; fixed 4/22/2020
       sprintf(addr,"%d($sp)",scnt*4);
       save = AppendSeq(save,GenInstr(NULL,"sw",TmpRegName(i),addr,NULL));
+        scnt++;
     }
   }
   if (scnt > 0) {
@@ -164,11 +166,13 @@ RestoreSeq()
 
   scnt = 0;
   save = NULL;
+  code = NULL;
   for (i = 0; i < MAXREG; i++) {
     if (!Registers[i].Free) {
-      scnt++;
+      //scnt++; fixed 4/22/20
       sprintf(addr,"%d($sp)",scnt*4);
       save = AppendSeq(save,GenInstr(NULL,"lw",TmpRegName(i),addr,NULL));
+        scnt++;
     }
   }
   if (scnt > 0) {

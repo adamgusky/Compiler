@@ -59,6 +59,7 @@ extern SymTab *table;
 %token WHILE
 %token FOR
 %token VOID
+%token RETURN
 
 
 %%
@@ -69,9 +70,11 @@ Declarations	:	Dec Declarations							            {};
 Declarations	:											                      {};
 Dec			      :	Int Id {enterName(table, $2); }';'	      {};
 Dec           : Int Id {enterName(table, $2); } '[' IntLit {setCurrentAttr(table, (void*)atoi(yytext)); }  ']' ';' {};
-Dec           : VOID Id '(' ')' '{' StmtSeq '}'           { doVoidNoParams($2, $6);};
+Dec           : VOID Id '(' ')' '{' StmtSeq '}'           { doNoParams("void", $2, $6);};
+Dec           : Int Id '(' ')' '{' StmtSeq '}'            { doNoParams("int", $2, $6);};
 StmtSeq       :	Stmt StmtSeq								              {$$ = AppendSeq($1, $2); } ;
 StmtSeq		    :											                      {$$ = NULL;} ;
+Stmt          : Dec                                       {}
 Stmt			    :	Write Expr ';'								            {$$ = doPrint($2); };
 Stmt          : Write '(' Exprs ')' ';'                   {$$ = addLine($3);};
 Stmt          : Read '(' Idents ')' ';'                   {$$ = addLine($3); };
@@ -84,6 +87,7 @@ Stmt          : PrintSpaces '(' Expr ')'  ';'             {$$ = doPrintSpaces($3
 Stmt          : WHILE '(' BStmt ')' '{' StmtSeq'}'        {$$ = doWhile($3, $6);};
 Stmt          : FOR '(' Id '=' Expr ';' BStmt ';' Id '=' Expr ')' '{' StmtSeq '}'           {$$ = doFor($3, $5, $7, $9, $11, $14);};
 Stmt          : Id '(' ')' ';'                            {$$ = callVoidNoParams($1);};
+Stmt          : RETURN Expr ';'                           {$$ = funcReturn($2);};
 BStmt         : BFactor                                   {$$ = $1;};
 BFactor       : BExpr AMP BExpr                           {$$ = doAnd($1, $3);};
 BFactor       : BExpr OR BExpr                            {$$ = doOr($1, $3);};
@@ -102,6 +106,7 @@ Exprs         : Expr                                      {$$ = printNoNewLineIn
 Expr			    :	Expr '+' Term								              {$$ = doAdd($1, $3); } ;
 Expr			    :	Expr '-' Term								              {$$ = doSub($1, $3); } ;
 Expr			    :	Term									                    {$$ = $1; } ;
+Expr			    :	Id '(' ')'						                    {$$ = doFuncAssign($1); } ;
 Term		      :	Term '*' Factor								            {$$ = doMult($1, $3); } ;
 Term		      :	Term '/' Factor								            {$$ = doDiv($1, $3); } ;
 Term		      :	Term '%' Factor								            {$$ = doMod($1, $3); } ;

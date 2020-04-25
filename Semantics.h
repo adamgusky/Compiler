@@ -23,6 +23,12 @@ struct BExprRes {
   struct InstrSeq * Instrs;
 };
 
+struct paramInfo {
+  char * type;
+  int num;
+  struct InstrSeq * instructions;
+};
+
 
 
 
@@ -60,8 +66,12 @@ extern struct InstrSeq * doWhile(struct BExprRes *bRes, struct InstrSeq * seq);
 extern struct InstrSeq * doFor(char * charVar1, struct ExprRes * res1, struct BExprRes * bRes1, char * var2, struct ExprRes * bRes2, struct InstrSeq * seq);
 extern struct InstrSeq * doIfElse(struct BExprRes * bRes, struct InstrSeq * seq1, struct InstrSeq * seq2);
 extern struct ExprRes * doArray (char * arrName, struct ExprRes* index);
-extern void doVoidNoParams(char * name, struct InstrSeq * seq);
+extern void doNoParams(char * type, char * name, struct InstrSeq * seq);
 extern struct InstrSeq * callVoidNoParams(char * name);
+extern struct ExprRes * doFuncAssign(char * func);
+extern struct InstrSeq * funcReturn(struct ExprRes * expr);
+
+
 
 
 
