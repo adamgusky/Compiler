@@ -1,0 +1,22 @@
+int num1;
+int num2;
+num1 = 10;
+num2 = 4;
+
+if (num1 == num2) {
+  print 1;
+} else {
+  print 5;
+}
+
+int counter;
+counter = 0;
+
+while (counter < 5) {
+  print counter;
+  counter = counter + 1;
+}
+
+for (counter = 0; counter < 5; counter = counter + 1) {
+  print counter;
+}

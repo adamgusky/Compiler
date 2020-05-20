@@ -5,6 +5,7 @@
 
 #include <strings.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "CodeGen.h"
 #include "Semantics.h"
@@ -12,7 +13,11 @@
 #include "IOMngr.h"
 
 extern SymTab *table;
-extern SymTab *fList;
+extern SymTab *fList; // a list of functions
+extern SymTab *parameters;
+extern int inAFunction;
+extern int stackPointerCounter;
+extern char * currentFunction;
 /* Semantics support routines */
 
 
@@ -30,15 +35,40 @@ struct ExprRes *  doIntLit(char * digits)  {
 struct ExprRes *  doRval(char * name)  {
 
    struct ExprRes *res;
-
-   if (!findName(table, name)) {
-		writeIndicator(getCurrentColumnNum());
-		writeMessage("Undeclared variable");
+   res = (struct ExprRes *) malloc(sizeof(struct ExprRes));
+   res->Reg = AvailTmpReg();
+   printf("method called.\n");
+   if (inAFunction) {
+     printf("yes we are in a function\n");
+     if (!findName(fList, currentFunction) && !findName(table, name)) {
+       writeIndicator(getCurrentColumnNum());
+       writeMessage("Undeclared Variable");
+     } else {
+       if (findName(fList, currentFunction)) {
+         struct paramInfo* info = (struct paramInfo*)getCurrentAttr(fList);
+         SymTab* vars = (SymTab*)info->vars;
+         if (!findName(vars, name)) {
+           if (!findName(table, name)) {
+             writeIndicator(getCurrentColumnNum());
+             writeMessage("Undeclared Variable");
+           } else {
+             res->Instrs = GenInstr(NULL, "lw", TmpRegName(res->Reg), name, NULL);
+           }
+         } else {
+           char * stackPointer = getCurrentAttr(vars);
+           printf("getting to getCurrentAttr(): %s", getCurrentAttr(vars));
+           res->Instrs = GenInstr(NULL, "lw", TmpRegName(res->Reg), stackPointer, NULL);
+         }
+       }
+     }
+   } else {
+       if (!findName(table, name)) {
+         writeIndicator(getCurrentColumnNum());
+         writeMessage("Undeclared Variable");
+       } else {
+         res->Instrs = GenInstr(NULL, "lw", TmpRegName(res->Reg), name, NULL);
+       }
    }
-  res = (struct ExprRes *) malloc(sizeof(struct ExprRes));
-  res->Reg = AvailTmpReg();
-  res->Instrs = GenInstr(NULL,"lw",TmpRegName(res->Reg),name,NULL);
-
   return res;
 }
 
@@ -47,14 +77,15 @@ extern struct ExprRes * doArray (char * arrName, struct ExprRes* index) {
   int address= AvailTmpReg();
   char* formattedAddress = (char*)malloc(sizeof(char)*10);
 
-  if (!findName(table, arrName)) {
-    writeIndicator(getCurrentColumnNum());
-    writeMessage("Undeclared variable");
-  }
-
   rtrn = (struct ExprRes*)malloc(sizeof(struct ExprRes));
   rtrn->Reg = AvailTmpReg();
   rtrn->Instrs = index->Instrs;
+
+  if (!findName(table, arrName)) {
+    writeIndicator(getCurrentColumnNum());
+    writeMessage("Undeclared Variable");
+  }
+
 
   AppendSeq(rtrn->Instrs, GenInstr(NULL, "la", TmpRegName(address), arrName, NULL));
   AppendSeq(rtrn->Instrs, GenInstr(NULL, "sll", TmpRegName(index->Reg), TmpRegName(index->Reg), "2"));
@@ -272,16 +303,16 @@ struct InstrSeq * doPrint(struct ExprRes * Expr) {
 
   code = Expr->Instrs;
 
-    AppendSeq(code,GenInstr(NULL,"li","$v0","1",NULL));
-    AppendSeq(code,GenInstr(NULL,"move","$a0",TmpRegName(Expr->Reg), NULL));
-    AppendSeq(code,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+  AppendSeq(code,GenInstr(NULL,"li","$v0","1",NULL));
+  AppendSeq(code,GenInstr(NULL,"move","$a0",TmpRegName(Expr->Reg), NULL));
+  AppendSeq(code,GenInstr(NULL,"syscall",NULL,NULL,NULL));
 
-    AppendSeq(code,GenInstr(NULL,"li","$v0","4",NULL));
-    AppendSeq(code,GenInstr(NULL,"la","$a0","_nl",NULL));
-   AppendSeq(code,GenInstr(NULL,"syscall",NULL,NULL,NULL));
+  AppendSeq(code,GenInstr(NULL,"li","$v0","4",NULL));
+  AppendSeq(code,GenInstr(NULL,"la","$a0","_nl",NULL));
+  AppendSeq(code,GenInstr(NULL,"syscall",NULL,NULL,NULL));
 
-    ReleaseTmpReg(Expr->Reg);
-    free(Expr);
+  ReleaseTmpReg(Expr->Reg);
+  free(Expr);
 
   return code;
 }
@@ -332,14 +363,39 @@ struct InstrSeq * doPrintSpaces(struct ExprRes * Expr) {
 
 struct InstrSeq * doAssign(char *name, struct ExprRes * Expr) {
   struct InstrSeq *code;
-  if (!findName(table, name)) {
-    writeIndicator(getCurrentColumnNum());
-    writeMessage("Undeclared variable");
-  }
 
   code = Expr->Instrs;
 
-  AppendSeq(code,GenInstr(NULL,"sw",TmpRegName(Expr->Reg), name, NULL));
+  if (inAFunction) {
+    if (!findName(fList, currentFunction) && !findName(table, name)) {
+      writeIndicator(getCurrentColumnNum());
+      writeMessage("Undeclared Variable");
+    } else {
+      if (findName(fList, currentFunction)) {
+        struct paramInfo* info = (struct paramInfo*)getCurrentAttr(fList);
+        SymTab * vars = (SymTab*)info->vars;
+        if (!findName(vars, name)) {
+          if (!findName(table, name)) {
+            writeIndicator(getCurrentColumnNum());
+            writeMessage("Undeclared Variable");
+          } else {
+            AppendSeq(code, GenInstr(NULL, "sw", TmpRegName(Expr->Reg), name, NULL));
+          }
+        } else {
+          char * stackPointer = getCurrentAttr(vars);
+          AppendSeq(code, GenInstr(NULL, "sw", TmpRegName(Expr->Reg), stackPointer, NULL));
+        }
+      }
+    }
+  } else {
+      if (!findName(table, name)) {
+        writeIndicator(getCurrentColumnNum());
+        writeMessage("Undeclared Variable");
+      } else {
+        AppendSeq(code, GenInstr(NULL, "sw", TmpRegName(Expr->Reg), name, NULL));
+      }
+  }
+
 
   ReleaseTmpReg(Expr->Reg);
   free(Expr);
@@ -631,15 +687,10 @@ extern struct InstrSeq * doFor(char * charVar1, struct ExprRes * res1, struct BE
 	return rtrn;
 }
 
+
 extern void doNoParams(char * type, char * name, struct InstrSeq * seq) {
   struct InstrSeq * rtrn;
-  struct paramInfo * parameters;
-
-  parameters = malloc(sizeof(struct paramInfo));
-
-  parameters->type = type;
-  parameters->num = 0;
-
+  printf("in donoparams\n");
   rtrn = GenInstr(name, NULL, NULL, NULL, NULL);
   AppendSeq(rtrn, SaveSeq());
   AppendSeq(rtrn, GenInstr(NULL, "addi", "$sp", "$sp", "-8"));
@@ -650,25 +701,26 @@ extern void doNoParams(char * type, char * name, struct InstrSeq * seq) {
   AppendSeq(rtrn, RestoreSeq());
   AppendSeq(rtrn, GenInstr(NULL, "jr", "$ra", NULL, NULL));
 
-  parameters->instructions = rtrn;
+  printf("\n\n %d \n\n", findName(fList, name));
 
-  if (enterName(fList, name)) {
-    setCurrentAttr(fList, (void*)rtrn);
-  } else {
-    writeIndicator(getCurrentColumnNum());
-    writeMessage("Failed on doVoidNoParams");
+  printf("current function %s \n", currentFunction);
+  if (findName(fList, name)) {
+    struct paramInfo * params = (struct paramInfo*)getCurrentAttr(fList);
+    params->instructions = rtrn;
   }
+  inAFunction = 0;
 }
 
-extern struct ExprRes * doFuncAssign(char * func) {
+
+extern struct ExprRes * doParamFuncAssign(char * func) {
   struct ExprRes * rtrn;
+  inAFunction = 1;
+  printf("InAFunction = %d\n", inAFunction);
   rtrn = (struct ExprRes*) malloc(sizeof(struct ExprRes));
   rtrn->Reg = AvailTmpReg();
-
-  if ( !findName(fList, func)) {
+  if (!findName(table, func)) {
     writeIndicator(getCurrentColumnNum());
-    writeMessage("Setting value to unkown function (Semantics.c, doFuncAssign())");
-
+    writeMessage("Undeclared Variable");
   }
 
   rtrn->Instrs = callVoidNoParams(func);
@@ -678,6 +730,130 @@ extern struct ExprRes * doFuncAssign(char * func) {
   // free
   return rtrn;
 }
+
+extern struct ExprRes * doFuncAssign(char * func) {
+  struct ExprRes * rtrn;
+  inAFunction = 1;
+  printf("InAFunction = %d\n", inAFunction);
+  rtrn = (struct ExprRes*) malloc(sizeof(struct ExprRes));
+  rtrn->Reg = AvailTmpReg();
+
+  if(findName(fList, func)){
+    if(((struct paramInfo *)getCurrentAttr(fList))->type == "void"){
+      writeIndicator(getCurrentColumnNum());
+      writeMessage("Error on void");
+    }
+  }else{
+    writeIndicator(getCurrentColumnNum());
+    writeMessage("Undeclared Function");
+  }
+
+  inAFunction = 1;
+
+  // if (inAFunction) {
+  //   if (!findName(fList, currentFunction) && !findName(table, func)) {
+  //     writeIndicator(getCurrentColumnNum());
+  //     writeMessage("Undeclared Variable");
+  //   } else {
+  //     if (findName(fList, currentFunction)) {
+  //       struct paramInfo* info = (struct paramInfo*)getCurrentAttr(fList);
+  //       SymTab * vars = (SymTab*)info->vars;
+  //       if (!findName(vars, func)) {
+  //         if (!findName(table, func)) {
+  //           writeIndicator(getCurrentColumnNum());
+  //           writeMessage("Undeclared Variable");
+  //         } else {
+  //           AppendSeq(rtrn->Instrs, GenInstr(NULL, "sw", TmpRegName(rtrn->Reg), func, NULL));
+  //         }
+  //       } else {
+  //         char * stackPointer = getCurrentAttr(vars);
+  //         AppendSeq(rtrn->Instrs, GenInstr(NULL, "sw", TmpRegName(rtrn->Reg), stackPointer, NULL));
+  //       }
+  //     }
+  //   }
+  // } else {
+  //     if (!findName(table, func)) {
+  //       writeIndicator(getCurrentColumnNum());
+  //       writeMessage("Undeclared Variable");
+  //     } else {
+  //       AppendSeq(rtrn->Instrs, GenInstr(NULL, "sw", TmpRegName(rtrn->Reg), func, NULL));
+  //     }
+  // }
+
+
+
+  //
+  // rtrn->Instrs = callVoidNoParams(func);
+  //
+  // AppendSeq(rtrn->Instrs, GenInstr(NULL, "lw", TmpRegName(rtrn->Reg), "-4($sp)", NULL));
+
+  // free
+  return rtrn;
+}
+
+int functionEnterName(char * name) {
+  printf("Function enter name\n");
+  char * stackPointerLocation = (char *)malloc(sizeof(char)*10);
+  struct paramInfo* info;
+  SymTab * vars;
+  if (enterName(fList, currentFunction)) {
+    printf("In if:\n");
+
+    info = malloc(sizeof(struct paramInfo));
+    vars = createSymTab(5);
+    info->vars = (SymTab *)(vars);
+    if (enterName(vars, name)) {
+      sprintf(stackPointerLocation, "%d($sp)", stackPointerCounter);
+      printf("Entering at: %s\n", stackPointerLocation);
+      setCurrentAttr(vars, (void*)stackPointerLocation);
+      stackPointerCounter = stackPointerCounter +4;
+    }
+    setCurrentAttr(fList, info);
+  } else {
+    printf("In else:\n");
+
+    // already a function
+    info = (struct paramInfo *)getCurrentAttr(fList);
+    vars = (SymTab*)info->vars;
+    if (enterName(vars, name)) {
+      sprintf(stackPointerLocation, "%d($sp)", stackPointerCounter);
+      printf("Entering at this location %s\n", stackPointerLocation);
+      setCurrentAttr(vars, (void*)stackPointerLocation);
+      stackPointerCounter = stackPointerCounter + 4;
+    }
+  }
+  printf("finished functionEnterName()\n");
+
+  return 1;
+}
+
+
+
+
+// needs to return ExprRes
+extern struct ExprRes * addToStack(struct ExprRes * expr) {
+  // printf("in addtostack\n");
+  // /* Adds to the stack */
+  //
+  // if (enterName(fList, currentFunction)) {
+  //   // use paramInfo and add a SymEntry with name and stack point to it's vars
+  //   printf("current function: %s\n", currentFunction);
+  //   struct paramInfo * thisFuncInfo = getCurrentAttr(fList);
+  //   SymTab * thisFunc = thisFuncInfo->vars;
+  //   findName(thisFunc, PARAMETER'S NAME);
+  //   char * spLocation = enterName(thisFunc, getCurrentAttr(thisFunc));
+  //
+  //   AppendSeq(expr->Instrs, GenInstr(NULL, "subu", "$sp", "$sp", "4"));
+  //   AppendSeq(expr->Instrs, GenInstr(NULL, "sw", TmpRegName(expr->Reg), spLocation, NULL));
+
+
+  // }
+  printf("the argument <%d> was added to: %s\n", expr->Reg, currentFunction);
+  // printf(", we get %d\n\n", stack);
+  // then create a function that pops the parameters
+  return expr;
+}
+
 
 
 extern struct InstrSeq * callVoidNoParams(char * name) {
@@ -736,7 +912,7 @@ Finish(struct InstrSeq *Code)
   hasMoreFunctions = startIterator(fList);
   while (hasMoreFunctions) {
     if (getCurrentAttr(fList)) {
-      AppendSeq(code, (struct InstrSeq *)(getCurrentAttr(fList)));
+      AppendSeq(code, ((struct paramInfo *)getCurrentAttr(fList))->instructions);
     }
     hasMoreFunctions = nextEntry(fList);
   }

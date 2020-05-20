@@ -1,0 +1,19 @@
+1. int num1;
+2. int num2;
+3. int num3;
+4. 
+5. num1 = 1;
+6. num2 = 2;
+7. num3 = 3;
+8. 
+9. read (num1, num2, num3);
+10. 
+11. print (num1, num1 * num2 / num3, num3^num2);
+12. 
+13. printline;
+14. 
+15. print 5;
+16. 
+17. printspaces(num3 * 5);
+18. 
+19. print 5;

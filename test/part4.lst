@@ -1,0 +1,9 @@
+1. int array[10];
+2. int i;
+3. for (i = 0; i < 9; i = i + 1) {
+4.   array[i] = i;
+5. }
+6. 
+7. i = 2;
+8. i = array[i * 2];
+9. print i;

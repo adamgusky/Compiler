@@ -47,3 +47,4 @@ if (num1 == 81 && 2 == 2 ) {
 if (num1 == 80 || num1 == 81) {
   print 9;
 }
+print num1;

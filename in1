@@ -1,7 +1,31 @@
+int num;
 int num1;
-int num2;
-num1 = 10 + 2;
-num2 = 20 * 3 + num1;
-print num1;
-print num2;
+num = 4;
 
+int f1(){
+    int a;
+    a = 3;
+    return a * num;
+}
+void f2(){
+    int b;
+    b = 2;
+    print b;
+}
+void f3(){
+    int a;
+    a = 1;
+    print a;
+}
+
+
+f3();
+f2();
+print f1();
+
+
+printline;
+
+print 1;
+print 2;
+print 12;

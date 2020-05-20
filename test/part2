@@ -1,0 +1,19 @@
+int num1;
+int num2;
+int num3;
+
+num1 = 1;
+num2 = 2;
+num3 = 3;
+
+read (num1, num2, num3);
+
+print (num1, num1 * num2 / num3, num3^num2);
+
+printline;
+
+print 5;
+
+printspaces(num3 * 5);
+
+print 5;

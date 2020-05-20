@@ -1,0 +1,23 @@
+int num1;
+num1 = 4;
+void printFive() {
+  int num2;
+  print 5;
+}
+int num3;
+num3 = 10;
+int print10() {
+  int num3;
+  num3 = 100;
+  print num3;
+  int ten;
+  return 10;
+}
+
+int num;
+int hello;
+hello = 12;
+
+printFive();
+int number;
+print number;

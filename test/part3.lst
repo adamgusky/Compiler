@@ -1,0 +1,19 @@
+1. int num1;
+2. int num2;
+3. num1 = 10;
+4. num2 = 4;
+5. 
+6. if (num1 == num2) {
+7.   print 1;
+8. } else {
+9.   print 5;
+10. }
+11. 
+12. int counter;
+13. counter = 0;
+14. 
+15. while (counter < 5) {
+16.   print counter;
+17.   counter++;
+             ^
+Illegal Character in YACC

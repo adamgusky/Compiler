@@ -25,7 +25,7 @@ struct BExprRes {
 
 struct paramInfo {
   char * type;
-  int num;
+  struct SymTab * vars; // a SymTab to store the names of parameters and where they are located in the stack
   struct InstrSeq * instructions;
 };
 
@@ -70,10 +70,10 @@ extern void doNoParams(char * type, char * name, struct InstrSeq * seq);
 extern struct InstrSeq * callVoidNoParams(char * name);
 extern struct ExprRes * doFuncAssign(char * func);
 extern struct InstrSeq * funcReturn(struct ExprRes * expr);
+extern struct ExprRes * addToStack(struct ExprRes * expr);
 
 
-
-
+extern int functionEnterName(char * name);
 
 
 extern void	Finish(struct InstrSeq *Code);
